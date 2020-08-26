@@ -137,7 +137,6 @@ extension Either where Left == Right {
 }
 
 extension Either: CustomDebugStringConvertible {
-    /// A textual representation of this instance, suitable for debugging.
     public var debugDescription: String {
         let leftDescription = String(describing: Left.self)
         let rightDescription = String(describing: Right.self)
