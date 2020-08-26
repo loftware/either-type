@@ -82,6 +82,29 @@ public enum Either<Left, Right> {
         }
     }
 
+    /// Unwrap an Either to a value of its `Left` type using a closure to
+    /// convert `Right` values to `Left`s.
+    ///
+    /// - Parameter toLeft: A closure that can convert a `Right` type into a
+    ///   `Left` type.
+    @inlinable
+    public func unwrapToLeft(
+        _ toLeft: (Right) throws -> Left
+    ) rethrows -> Left {
+        switch self {
+        case .left(let l): return l
+        case .right(let r): return try toLeft(r)
+        }
+    }
+
+    /// Attempt to extract a `Left` value from the `Either`. If the `Either`
+    /// contains a `Right`, this will fatal error.
+    @inlinable
+    public func forceUnwrapLeft() -> Left {
+        guard case let .left(result) = self else { fatalError() }
+        return result
+    }
+
     /// Unwrap an Either to a value of its `Right` type using a closure to
     /// convert `Left` values to `Right`s.
     ///
@@ -97,19 +120,12 @@ public enum Either<Left, Right> {
         }
     }
 
-    /// Unwrap an Either to a value of its `Left` type using a closure to
-    /// convert `Right` values to `Left`s.
-    ///
-    /// - Parameter toLeft: A closure that can convert a `Right` type into a
-    ///   `Left` type.
+    /// Attempt to extract a `Right` value from the `Either`. If the `Either`
+    /// contains a `Left`, this will fatal error.
     @inlinable
-    public func unwrapToLeft(
-        _ toLeft: (Right) throws -> Left
-    ) rethrows -> Left {
-        switch self {
-        case .left(let l): return l
-        case .right(let r): return try toLeft(r)
-        }
+    public func forceUnwrapRight() -> Right {
+        guard case let .right(result) = self else { fatalError() }
+        return result
     }
 
     /// Flips the `left` and `right` of the `Either`.

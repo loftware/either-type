@@ -144,6 +144,11 @@ final class EitherTests: XCTestCase {
         XCTAssertThrowsError(try decoder.decode(TestType.self, from :emptyData))
     }
 
+    func testForceUnwrap() {
+        XCTAssertEqual(left.forceUnwrapLeft(), 13)
+        XCTAssertEqual(right.forceUnwrapRight(), true)
+    }
+
     static var allTests = [
         ("testInitializers", testInitializers),
         ("testMap", testMap),
@@ -156,6 +161,7 @@ final class EitherTests: XCTestCase {
         ("testComparable", testComparable),
         ("testEncoding", testEncoding),
         ("testDecoding", testDecoding),
-        ("testDecodeEmptyData", testDecodeEmptyData)
+        ("testDecodeEmptyData", testDecodeEmptyData),
+        ("testForceUnwrap", testForceUnwrap)
     ]
 }
