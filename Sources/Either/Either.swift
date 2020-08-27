@@ -97,14 +97,6 @@ public enum Either<Left, Right> {
         }
     }
 
-    /// Attempt to extract a `Left` value from the `Either`. If the `Either`
-    /// contains a `Right`, this will fatal error.
-    @inlinable
-    public func forceUnwrapLeft() -> Left {
-        guard case let .left(result) = self else { fatalError() }
-        return result
-    }
-
     /// Unwrap an Either to a value of its `Right` type using a closure to
     /// convert `Left` values to `Right`s.
     ///
@@ -120,11 +112,17 @@ public enum Either<Left, Right> {
         }
     }
 
-    /// Attempt to extract a `Right` value from the `Either`. If the `Either`
-    /// contains a `Left`, this will fatal error.
+    /// The `Left` value of the `Either` if it has one, otherwise `nil`.
     @inlinable
-    public func forceUnwrapRight() -> Right {
-        guard case let .right(result) = self else { fatalError() }
+    public var left: Left? {
+        guard case let .left(result) = self else { return nil }
+        return result
+    }
+
+    /// The `Right` value of the `Either` if it has one, otherwise `nil`.
+    @inlinable
+    public var right: Right? {
+        guard case let .right(result) = self else { return nil }
         return result
     }
 
