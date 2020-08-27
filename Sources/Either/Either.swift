@@ -211,11 +211,19 @@ extension Either {
         self = .right(right)
     }
 
-    /// An `Either` containing a `Left` value.
+    /// Create an either, inferring if it is a `Left` or a `Right` based on its
+    /// type.
     public init(_ left: Left) { self = .left(left) }
 
-    /// An `Either` containing a `Right` value.
+    /// Create an either, inferring if it is a `Left` or a `Right` based on its
+    /// type.
     public init(_ right: Right) { self = .right(right) }
+
+    /// An `Either` explicitly containing a `Left` value.
+    public init(left: Left) { self = .left(left) }
+
+    /// An `Either` explicitly containing a `Right` value.
+    public init(right: Right) { self = .right(right) }
 }
 
 // Mark: Standard conformances
