@@ -29,24 +29,43 @@ final class EitherTests: XCTestCase {
         let leftTransform = { $0 - 6 }
         let rightTransform = { !$0 }
 
-        let leftResult = left.map(
-            left: leftTransform,
-            right: rightTransform)
+        let leftResult = left.mapLeft {
+            leftTransform($0)
+        } andRight: {
+            rightTransform($0)
+        }
 
-        let rightResult = right.map(
-            left: leftTransform,
-            right: rightTransform)
+        let rightResult = right.mapLeft {
+            leftTransform($0)
+        } andRight: {
+            rightTransform($0)
+        }
 
         XCTAssertEqual(leftResult, Either(7, or: Bool.self))
         XCTAssertEqual(rightResult, Either(right: false, orLeft: Int.self))
     }
 
+    func testMapLeft() {
+
+    }
+
+    func testMapRight() {
+
+    }
+
     func testIndividualLeftRightUnwrap() {
         let leftTransform: (Int) -> String = { String($0) }
         let rightTransform: (Bool) -> String = { String($0) }
-        let leftResult = left.unwrap(left: leftTransform, right: rightTransform)
-        let rightResult = right.unwrap(left: leftTransform,
-            right: rightTransform)
+        let leftResult = left.unwrapLeft {
+            leftTransform($0)
+        } andRight: {
+            rightTransform($0)
+        }
+        let rightResult = right.unwrapLeft {
+            leftTransform($0)
+        } andRight: {
+            rightTransform($0)
+        }
         XCTAssertEqual(leftResult, "13")
         XCTAssertEqual(rightResult, "true")
     }
@@ -112,10 +131,9 @@ final class EitherTests: XCTestCase {
 
         // Ensure that changing the unrepresented type doesn't change the
         // encoding of a value.
-        let mappedData = left.map(
-            left: { $0 },
-            right: { String($0) }
-        )
+        let mappedData = left.mapRight {
+            String($0)
+        }
         let data3 = try encoder.encode(mappedData)
         XCTAssertEqual(leftString, String(data: data3, encoding: .utf8)!)
     }
@@ -123,7 +141,6 @@ final class EitherTests: XCTestCase {
     func testDecoding() throws {
         let leftData = "{\"left\":13}".data(using: .utf8)!
         let rightData = "{\"right\":true}".data(using: .utf8)!
-
 
         let decoder = JSONDecoder()
 
@@ -154,6 +171,8 @@ final class EitherTests: XCTestCase {
     static var allTests = [
         ("testInitializers", testInitializers),
         ("testMap", testMap),
+        ("testMapLeft", testMapLeft),
+        ("testMapRight", testMapRight),
         ("testIndividualizedLeftRightUnwrap", testIndividualLeftRightUnwrap),
         ("testToLeftTypeUnwrap", testToLeftTypeUnwrap),
         ("testToRightTypeUnwrap", testToRightTypeUnwrap),
