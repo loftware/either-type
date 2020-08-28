@@ -159,29 +159,29 @@ public enum Either<Left, Right> {
     /// Unwrap an Either to a value of its `Left` type using a closure to
     /// convert `Right` values to `Left`s.
     ///
-    /// - Parameter toLeft: A closure that converts a `Right` type into a
-    ///   `Left` type.
+    /// - Parameter transformRightToLeft: A closure that converts a `Right` type
+    ///   into a `Left` type.
     @inlinable
     public func unwrapToLeft(
-        _ toLeft: (Right) throws -> Left
+        _ transformRightToLeft: (Right) throws -> Left
     ) rethrows -> Left {
         switch self {
         case .left(let l): return l
-        case .right(let r): return try toLeft(r)
+        case .right(let r): return try transformRightToLeft(r)
         }
     }
 
     /// Unwrap an Either to a value of its `Right` type using a closure to
     /// convert `Left` values to `Right`s.
     ///
-    /// - Parameter toRight: A closure that can convert a `Left` type into a
-    ///   `Right` type.
+    /// - Parameter transformLeftToRight: A closure that can convert a `Left`
+    ///   type into a `Right` type.
     @inlinable
     public func unwrapToRight(
-        _ toRight: (Left) throws -> Right
+        _ transformLeftToRight: (Left) throws -> Right
     ) rethrows -> Right {
         switch self {
-        case .left(let l): return try toRight(l)
+        case .left(let l): return try transformLeftToRight(l)
         case .right(let r): return r
         }
     }
