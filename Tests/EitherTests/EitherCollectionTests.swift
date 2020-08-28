@@ -33,37 +33,37 @@ final class EitherCollectionTests: XCTestCase {
     }
 
     func testLazyLefts() {
-        var lazynessBroken = false
+        var lazinessBroken = false
         let mappedLefts = eithers.lazy
             .map { (either: Either<Int, String>) -> Either<Int, String> in
-                lazynessBroken = true
+                lazinessBroken = true
                 return either
             }
             .lefts()
             .map { (left: Int) -> Int in
-                lazynessBroken = true
+                lazinessBroken = true
                 return left + 1
             }
-        XCTAssertFalse(lazynessBroken)
+        XCTAssertFalse(lazinessBroken, "Failed to maintain laziness")
         XCTAssertEqual(Array(mappedLefts), [2, 3, 4])
-        XCTAssertTrue(lazynessBroken)
+        XCTAssertTrue(lazinessBroken)
     }
 
     func testLazyRights() {
-        var lazynessBroken = false
+        var lazinessBroken = false
         let mappedRights = eithers.lazy
             .map { (either: Either<Int, String>) -> Either<Int, String> in
-                lazynessBroken = true
+                lazinessBroken = true
                 return either
             }
             .rights()
             .map { (right: String) -> String in
-                lazynessBroken = true
+                lazinessBroken = true
                 return right + "!"
             }
-        XCTAssertFalse(lazynessBroken)
+        XCTAssertFalse(lazinessBroken, "Failed to maintain laziness")
         XCTAssertEqual(Array(mappedRights), ["a!", "b!", "c!"])
-        XCTAssertTrue(lazynessBroken)
+        XCTAssertTrue(lazinessBroken)
     }
 
     static var allTests = [
