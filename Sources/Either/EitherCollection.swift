@@ -38,19 +38,6 @@ extension Sequence {
             }
             .map { $0.right! }
     }
-
-    func mapLeft<L, R, U, V>(
-        _ transformLeft: (L) -> U,
-        andRight transformRight: (R) -> V
-    ) -> [Either<U, V>] where Self.Element == Either<L, R> {
-        return self.map {
-            $0.mapLeft {
-                transformLeft($0)
-            } andRight: {
-                transformRight($0)
-            }
-        }
-    }
 }
 
 /// A `LazySequenceProtocol` containing the underlying lefts of a
