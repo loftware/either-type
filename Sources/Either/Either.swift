@@ -1,21 +1,8 @@
 /// A type that represents a value of either type `Left` or type `Right`.
 ///
-/// This `Either` type is an enumeration with two cases, `Either.left(Left)`,
-/// and `Either.right(Right)` with each case representing a value of one of the
-/// two possible types in the `Either`. No particular importance should be
-/// placed on which type is made the left or right case.
-///
-/// In the example below, the types of `a` and `b` are the same even though they
-/// *represent* non-homogenous types:
-///
-///     let a: Either<Int, String> = Either(5)
-///     let b: Either<Int, String> = Either("hello!")
-///     print(type(of: a) == type(of: b))
-///     // Prints "true"
-///
-/// Because `Either`s represent two underlying types, they cannot be mapped
-/// operated on monomorphically. Instead, two ways of unwrapping them to a
-/// single type must be provided.
+/// Because `Either`s represent two underlying types, they cannot be operated on
+/// monomorphically. Operations that act on `Either`s must provide ways of
+/// handling the `Left` and `Right` types individually.
 @frozen
 public enum Either<Left, Right> {
     /// A value of type `Left`.
@@ -24,27 +11,8 @@ public enum Either<Left, Right> {
     /// A value of type `Right`.
     case right(Right)
 
-    /// An `Either` created by transforming the left of this either leaving
-    /// right values unchanged.
-    ///
-    /// This produces a new `Either` with its `Left` being the result type of
-    /// the `left` closure, and its right type and value unchanged.
-    ///
-    ///     let code = Either(3, or: String.self)
-    ///     let message = Either(right: "7", orLeft: Int.self)
-    ///     let flipFlopped = code.mapLeft {
-    ///         String($0)
-    ///     }
-    ///     let unchanged = message.mapLeft {
-    ///         String($0)
-    ///     }
-    ///     print(flipFlopped)
-    ///     // Prints "Either<String, String>(left("3"))"
-    ///     print(unchanged)
-    ///     // Prints "Either<String, String>(right("7"))"
-    ///
-    /// - Parameter transformLeft: A closure that takes the `Left` of the old
-    ///   `Either`, and produces a `Left` of the new `Either.`
+    /// An `Either` created by transforming the left of this either (if it has
+    /// one) leaving right values unchanged.
     @inlinable
     public func mapLeft<U>(
         _ transformLeft: (Left) throws -> U
@@ -55,27 +23,8 @@ public enum Either<Left, Right> {
         }
     }
 
-    /// An `Either` created by transforming the right of this either leaving
-    /// left values unchanged.
-    ///
-    /// This produces a new `Either` with its `Right` being the result type of
-    /// the `transformRight` closure, and its left type and value unchanged.
-    ///
-    ///     let code = Either(3, or: String.self)
-    ///     let message = Either(right: "7", orLeft: Int.self)
-    ///     let unchanged = code.mapRight {
-    ///         Int($0)!
-    ///     }
-    ///     let flipFlopped = message.mapRight {
-    ///         Int($0)!
-    ///     }
-    ///     print()
-    ///     // Prints "Either<Int, Int>(left(3))"
-    ///     print(flipFlopped)
-    ///     // Prints "Either<Int, Int>(right(7))"
-    ///
-    /// - Parameter transformRight: A closure that takes the `Right` of the old
-    ///   `Either`, and produces a `Right` of the new `Either.`
+    /// An `Either` created by transforming the right of this either (if it has
+    /// one) leaving left values unchanged.
     @inlinable
     public func mapRight<U>(
         _ transformRight: (Right) throws -> U
@@ -88,37 +37,11 @@ public enum Either<Left, Right> {
 
     /// An `Either` created by independently mapping over the `Left` and `Right`
     /// of this `Either`.
-    ///
-    /// This produces a new `Either` with its `Left` being the result type of
-    /// the `transformLeft` closure, and its `Right` being the result type of
-    /// the `transformRight` closure as shown below:
-    ///
-    ///     let code = Either(3, or: String.self)
-    ///     let message = Either(right: "7", orLeft: Int.self)
-    ///     let flipFlopped = code.mapLeft {
-    ///         String($0)
-    ///     } andRight: {
-    ///         Int($0)!
-    ///     }
-    ///     let flipFlopped2 = message.mapLeft {
-    ///         String($0)
-    ///     } andRight: {
-    ///         Int($0)!
-    ///     }
-    ///     print(flipFlopped)
-    ///     // Prints "Either<String, Int>(left("3"))"
-    ///     print(flipFlopped2)
-    ///     // Prints "Either<String, Int>(right(7))"
-    ///
-    /// - Parameter transformLeft: A closure that takes the `Left` of the old
-    ///   `Either`, and produces a `Left` of the new `Either.`
-    /// - Parameter transformRight: A closure that takes the `Right` of the old
-    ///   `Either`, and produces a `Right` of the new `Either.`
     @inlinable
-    public func mapLeft<U, V>(
-        _ transformLeft: (Left) throws -> U,
-        andRight transformRight: (Right) throws -> V
-    ) rethrows -> Either<U,V> {
+    public func mapLeft<NewLeft, NewRight>(
+        _ transformLeft: (Left) throws -> NewLeft,
+        right transformRight: (Right) throws -> NewRight
+    ) rethrows -> Either<NewLeft, NewRight> {
         switch self {
         case .left(let l):
             return .left(try transformLeft(l))
@@ -128,25 +51,11 @@ public enum Either<Left, Right> {
     }
 
     /// Unwrap an `Either` by independently transforming the `Left` and `Right`
-    /// types into a uniform `Result` type.
-    ///
-    ///     let messageOrCode = Either<Int, String>.left(3)
-    ///     let isCodeGood = messageOrCode.unwrapLeft {
-    ///         $0 > 3
-    ///     } andRight: {
-    ///         $0.contains("success")
-    ///     }
-    ///     print(result)
-    ///     // Prints "false"
-    ///
-    /// - Parameter unwrapLeft: A closure that takes the `Left` of the `Either`,
-    ///   and produces a `Result`.
-    /// - Parameter unwrapRight: A closure that takes the `Right` of the
-    ///   `Either`, and produces a `Result`.
+    /// types into a single `Result` type.
     @inlinable
     public func unwrapLeft<Result>(
         _ unwrapLeft: (Left) throws -> Result,
-        andRight unwrapRight: (Right) throws -> Result
+        right unwrapRight: (Right) throws -> Result
     ) rethrows -> Result {
         switch self {
         case .left(let l):
@@ -158,9 +67,6 @@ public enum Either<Left, Right> {
 
     /// Unwrap an Either to a value of its `Left` type using a closure to
     /// convert `Right` values to `Left`s.
-    ///
-    /// - Parameter transformRightToLeft: A closure that converts a `Right` type
-    ///   into a `Left` type.
     @inlinable
     public func unwrapToLeft(
         _ transformRightToLeft: (Right) throws -> Left
@@ -173,9 +79,6 @@ public enum Either<Left, Right> {
 
     /// Unwrap an Either to a value of its `Right` type using a closure to
     /// convert `Left` values to `Right`s.
-    ///
-    /// - Parameter transformLeftToRight: A closure that can convert a `Left`
-    ///   type into a `Right` type.
     @inlinable
     public func unwrapToRight(
         _ transformLeftToRight: (Left) throws -> Right
@@ -200,7 +103,7 @@ public enum Either<Left, Right> {
         return result
     }
 
-    /// Flips the `left` and `right` of the `Either`.
+    /// Switches the `left` and `right` of the `Either`.
     @inlinable
     public func flip() -> Either<Right, Left> {
         switch self {
@@ -211,10 +114,7 @@ public enum Either<Left, Right> {
 }
 
 extension Either where Left == Right {
-    /// Unwrap a homogenous `Either` type to its underlying value.
-    ///
-    /// If `Left` and `Right` are homogenous types, there's no need for
-    /// conversion and the underlying values in both cases can be used.
+    /// Unwrap a homogeneous `Either` type to its underlying value.
     @inlinable
     public func unwrap() -> Left {
         switch self {
