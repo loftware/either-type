@@ -124,17 +124,25 @@ extension Either where Left == Right {
     }
 }
 
+extension Either: CustomStringConvertible
+where Left: CustomStringConvertible, Right: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .left(let l): return "left(\(l.description))"
+        case .right(let r): return "right(\(r.description))"
+        }
+    }
+}
+
 extension Either: CustomDebugStringConvertible {
     public var debugDescription: String {
-        let leftDescription = String(describing: Left.self)
-        let rightDescription = String(describing: Right.self)
-        var result = "Either<\(leftDescription),\(rightDescription)>("
+        var result = ""
         switch self {
         case .left(let l):
-            result += "left("
+            result += "Either<_,\(String(describing: Right.self))>(left("
             debugPrint(l, terminator: "", to: &result)
         case .right(let r):
-            result += "right("
+            result += "Either<\(String(describing: Left.self)),_>(right("
             debugPrint(r, terminator: "", to: &result)
         }
         result += "))"
@@ -142,65 +150,12 @@ extension Either: CustomDebugStringConvertible {
     }
 }
 
-extension Either: CustomReflectable {
-    public var customMirror: Mirror {
-        switch self {
-        case .left(let l):
-        return Mirror(
-            self,
-            children: [ "left": l ],
-            displayStyle: .enum)
-        case .right(let r):
-        return Mirror(
-            self,
-            children: [ "right": r ],
-            displayStyle: .enum)
-        }
-    }
-}
-
-// Mark: Convenience initializers
+// Mark: Standard conformances
 
 // Attribution note: The following block of code up until the end attribution
 // comment was inspired by similar extensions found in the `Either` type of the
 // Swift standard library, located here:
 // https://github.com/apple/swift/blob/master/stdlib/public/core/EitherSequence.swift
-extension Either {
-    /// An `Either` wrapping the `Left` type, with the unrepresented alternative
-    /// `Right` type specified.
-    ///
-    /// This can be used to initialize an `Either` inline in a context where the
-    /// `Right` type cannot be inferred. This is preferred over
-    /// `Init(right:orLeft:)` for cases where it doesn't matter which type ends
-    /// up on which side of the either.
-    public init(_ left: Left, or other: Right.Type) { self = .left(left) }
-
-    /// An `Either` wrapping the `Right` type, with the unrepresented
-    /// alternative `Left` type specified.
-    ///
-    /// This can be used to initialize an `Either` inline in a context where the
-    /// `Left` type cannot be inferred, and it matters that the value
-    /// represented is of the `Right` type.
-    public init(right: Right, orLeft other: Left.Type) {
-        self = .right(right)
-    }
-
-    /// Create an either, inferring if it is a `Left` or a `Right` based on its
-    /// type.
-    public init(_ left: Left) { self = .left(left) }
-
-    /// Create an either, inferring if it is a `Left` or a `Right` based on its
-    /// type.
-    public init(_ right: Right) { self = .right(right) }
-
-    /// An `Either` explicitly containing a `Left` value.
-    public init(left: Left) { self = .left(left) }
-
-    /// An `Either` explicitly containing a `Right` value.
-    public init(right: Right) { self = .right(right) }
-}
-
-// Mark: Standard conformances
 
 extension Either: Comparable where Left: Comparable, Right: Comparable {
     public static func < (lhs: Self, rhs: Self) -> Bool {
@@ -241,8 +196,8 @@ extension Either: Decodable where Left: Decodable, Right: Decodable {
             let errorContext = DecodingError.Context(
                 codingPath: [CodingKeys.right],
                 debugDescription: """
-                Neither value in `Either<\(String(describing: Left.self)), \
-                \(String(describing: Right.self))>` present in encoded value.
+                Neither value in \(String(describing: Self.self)) is present \
+                in encoded value.
                 """)
             throw DecodingError.dataCorrupted(errorContext)
         }

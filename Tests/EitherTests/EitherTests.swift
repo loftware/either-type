@@ -7,23 +7,6 @@ final class EitherTests: XCTestCase {
     let left: TestType = .left(13)
     let right: TestType = .right(true)
 
-    func testInitializers() {
-        let left2 = TestType(13)
-        let left3: TestType = Either(13)
-        let left4 = Either(13, or: Bool.self)
-
-        let right2 = TestType(true)
-        let right3: TestType = Either(true)
-        let right4 = Either(right: true, orLeft: Int.self)
-
-        XCTAssert(left == left2 && left2 == left3 && left3 == left4,
-            "Eithers initialized to the same value were not equivalent")
-        XCTAssert(right == right2 && right2 == right3 && right3 == right4,
-            "Eithers initialized to the same value were not equivalent")
-        XCTAssert(type(of: left) == type(of: right), """
-            Types of left and right constructed eithers were not equivalent
-            """)
-    }
 
     func testMap() {
         let leftTransform = { $0 - 6 }
@@ -31,18 +14,18 @@ final class EitherTests: XCTestCase {
 
         let leftResult = left.mapLeft {
             leftTransform($0)
-        } andRight: {
+        } right: {
             rightTransform($0)
         }
 
         let rightResult = right.mapLeft {
             leftTransform($0)
-        } andRight: {
+        } right: {
             rightTransform($0)
         }
 
-        XCTAssertEqual(leftResult, Either(7, or: Bool.self))
-        XCTAssertEqual(rightResult, Either(right: false, orLeft: Int.self))
+        XCTAssertEqual(leftResult, .left(7))
+        XCTAssertEqual(rightResult, .right(false))
     }
 
     func testMapLeft() {
@@ -58,12 +41,12 @@ final class EitherTests: XCTestCase {
         let rightTransform: (Bool) -> String = { String($0) }
         let leftResult = left.unwrapLeft {
             leftTransform($0)
-        } andRight: {
+        } right: {
             rightTransform($0)
         }
         let rightResult = right.unwrapLeft {
             leftTransform($0)
-        } andRight: {
+        } right: {
             rightTransform($0)
         }
         XCTAssertEqual(leftResult, "13")
@@ -85,37 +68,38 @@ final class EitherTests: XCTestCase {
     }
 
     func testSameTypeUnwrap() {
-        XCTAssertEqual(Either(13, or: Int.self).unwrap(), 13)
-        XCTAssertEqual(Either(right: 13, orLeft: Int.self).unwrap(), 13)
+        XCTAssertEqual(Either<Int, Int>.left(13).unwrap(), 13)
+        XCTAssertEqual(Either<Int, Int>.right(13).unwrap(), 13)
     }
 
     func testFlip() {
-        XCTAssertEqual(left.flip(), Either(right: 13, orLeft: Bool.self))
-        XCTAssertEqual(right.flip(), Either(true, or: Int.self))
+        XCTAssertEqual(left.flip(), Either<Bool, Int>.right(13))
+        XCTAssertEqual(right.flip(), Either<Bool, Int>.left(true))
 
         // check to make sure that flipping two things of the same type
         // correctly flips the value's side
-        XCTAssertEqual(Either(13, or: Int.self).flip(),
-            Either(right: 13, orLeft: Int.self))
-        XCTAssertEqual(Either(right: 13, orLeft: Int.self).flip(),
-            Either(13, or: Int.self))
+        XCTAssertEqual(Either<Int, Int>.left(13).flip(), .right(13))
+        XCTAssertEqual(Either<Int, Int>.right(13).flip(), .left(13))
+    }
+
+    func testDescription() {
+        XCTAssertEqual(left.description, "left(13)")
+        XCTAssertEqual(right.description, "right(true)")
+        XCTAssertEqual(left.flip().description, "right(13)")
     }
 
     func testDebugDescription() {
-        XCTAssertEqual(left.debugDescription, "Either<Int,Bool>(left(13))")
-        XCTAssertEqual(right.debugDescription, "Either<Int,Bool>(right(true))")
+        XCTAssertEqual(left.debugDescription, "Either<_,Bool>(left(13))")
+        XCTAssertEqual(right.debugDescription, "Either<Int,_>(right(true))")
         XCTAssertEqual(right.flip().debugDescription,
-            "Either<Bool,Int>(left(true))")
+            "Either<_,Int>(left(true))")
     }
 
     func testComparable() {
-        XCTAssert(Either(13, or: Double.self) < Either(15, or: Double.self))
-        XCTAssert(Either(right: 13, orLeft: Double.self) <
-            Either(right: 15, orLeft: Double.self))
-        XCTAssert(Either(13, or: Double.self) <
-            Either(right: 13, orLeft: Double.self))
-        XCTAssertFalse(Either(right: 13, orLeft: Double.self) <
-            Either(13, or: Double.self))
+        XCTAssert(Either<Int, Double>.left(13) < .right(15))
+        XCTAssert(Either<Double, Int>.right(13) < .right(15))
+        XCTAssert(Either<Int, Double>.left(13) < .right(13))
+        XCTAssertFalse(Either<Double, Int>.right(13) < .left(13))
     }
 
     func testEncoding() throws {
@@ -169,7 +153,6 @@ final class EitherTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testInitializers", testInitializers),
         ("testMap", testMap),
         ("testMapLeft", testMapLeft),
         ("testMapRight", testMapRight),

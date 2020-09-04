@@ -2,22 +2,22 @@ import XCTest
 @testable import Either
 
 final class EitherCollectionTests: XCTestCase {
-    let eithers: Array<Either<Int, String>> = [
-        Either(1),
-        Either("a"),
-        Either(2),
-        Either("b"),
-        Either(3),
-        Either("c"),
+    let eithers: [Either<Int, String>] = [
+        .left(1),
+        .right("a"),
+        .left(2),
+        .right("b"),
+        .left(3),
+        .right("c"),
     ]
 
-    let empty: Array<Either<Int, String>> = []
+    let empty: [Either<Int, String>] = []
 
-    let homogeneous: Array<Either<Int, Int>> = [
-        Either(left: 1),
-        Either(left: 2),
-        Either(right: 3),
-        Either(right: 4),
+    let homogeneous: [Either<Int, Int>] = [
+        .left(1),
+        .left(2),
+        .right(3),
+        .right(4),
     ]
 
     func testStrictLefts() {
