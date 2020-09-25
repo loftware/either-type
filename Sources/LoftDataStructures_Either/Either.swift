@@ -1,8 +1,8 @@
 /// A type that represents a value of either type `Left` or type `Right`.
 ///
-/// Because `Either`s represent two underlying types, they cannot be operated on
-/// monomorphically. Operations that act on `Either`s must provide ways of
-/// handling the `Left` and `Right` types individually.
+/// Because `Either`s contain one of two underlying types, they cannot be
+/// operated on monomorphically. Operations that act on `Either`s must provide
+/// ways of handling the `Left` and `Right` types individually.
 @frozen
 public enum Either<Left, Right> {
     /// A value of type `Left`.

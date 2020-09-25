@@ -1,16 +1,16 @@
-# either-type
+# LoftDataStructures_Either
+
 A general purpose either type and basic utilities to support its use.
 
 ## API Notes
 
 ### Multiple Closure APIs
 
-As of now, despite the contentious nature of multiple trailing closures, the
-APIs in this package that utilize multiple closures are optimized for cases
-where they are used at the call site. This means attaching the description of
-the first closure argument to the end of the function name, and providing a
-descriptive label for further closure arguments that is intended for use as a
-second trailing closure label.
+The APIs in this package that utilize multiple closures are optimized for the
+use of the multiple trailing closures feature at the call site. This means
+attaching the description of the first closure argument to the end of the
+function name, and providing a descriptive label for further closure arguments
+that is intended for use as a second trailing closure label.
 
 ### Either Enum Case Naming
 

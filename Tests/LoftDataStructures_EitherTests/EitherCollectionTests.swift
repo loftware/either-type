@@ -1,5 +1,5 @@
 import XCTest
-@testable import Either
+@testable import LoftDataStructures_Either
 
 final class EitherCollectionTests: XCTestCase {
     let eithers: [Either<Int, String>] = [

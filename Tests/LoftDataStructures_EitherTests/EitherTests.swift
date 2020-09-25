@@ -1,5 +1,5 @@
 import XCTest
-@testable import Either
+@testable import LoftDataStructures_Either
 
 final class EitherTests: XCTestCase {
     typealias TestType = Either<Int, Bool>
